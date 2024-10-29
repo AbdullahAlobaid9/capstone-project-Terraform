@@ -1,0 +1,25 @@
+#! /bin/sh
+
+sudo apt-get update -yy
+sudo apt-get install -yy git curl
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh
+
+sudo mkdir capstone-flask
+cd /
+cd capstone-flask
+
+sudo bash -c 'cat <<EOT > .env
+REDIS_HOST=${redis_host}
+REDIS_PORT=6379
+DB_HOST=${mysql_host}
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=mydatabase
+EOT'
+
+sudo docker run -d -p 80:5000 --name web \
+  --env-file .env \
+  afalobaid9/capstone-flask:latest \
+  sh -c "python -c 'from app import init_db; init_db()' && flask run --host=0.0.0.0"
